@@ -37,3 +37,4 @@ venv
 
 dev/*
 temp/
+.DS_Store

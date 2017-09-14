@@ -41,7 +41,19 @@ abstract(Vs) ->
   Maps = lists:zip(Symbs, Vs),
   {Symbs, Maps}.
 
-%% Extract new concrete input from the symbolic mapping and the solver's result
+%% Extract new concrete input from the symbolic mapping and the solver's result (ORIGINAL)
+% -spec generate_new_input([mapping()], [{symbolic(), cuter_solver:model()}]) -> [any()].
+% generate_new_input(Maps, Model) ->
+%   F = fun({X, V}) ->
+%     NV = cuter_solver:lookup_in_model(X, Model),  %% Do not expect an exception to be raised
+%     case cuter_lib:is_unbound_var(NV) of
+%       true  -> V;
+%       false -> NV
+%     end
+%   end,
+%   [F(M) || M <- Maps].
+
+%% Extract new concrete input from the symbolic mapping and the solver's result (MODIFIED)
 -spec generate_new_input([mapping()], [{symbolic(), cuter_solver:model()}]) -> [any()].
 generate_new_input(Maps, Model) ->
   F = fun({X, V}) ->
@@ -51,7 +63,10 @@ generate_new_input(Maps, Model) ->
       false -> NV
     end
   end,
-  [F(M) || M <- Maps].
+  R = [F(M) || M <- Maps],
+  cuterIn ! {add,R},
+  R.
+
 
 %% Serialize the representation of a symbolic value
 -spec serialize(symbolic()) -> list().

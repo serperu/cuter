@@ -165,7 +165,7 @@ start([{M, F, As, Depth}|Seeds], Conf) ->
   Errors = start_one(M, F, As, Depth, CodeServer, Scheduler, Dir, N_Pollers, N_Solvers),
   NewErrors = [{{M, F, length(As)}, Errors}|Conf#conf.errors],
   Conf1 = Conf#conf{errors = NewErrors},
-  io:nl(),
+  %io:nl(),
   start(Seeds, Conf1).
 
 start_one(M, F, As, Depth, CodeServer, Scheduler, Dir, N_Pollers, N_Solvers) ->
