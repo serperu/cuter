@@ -113,7 +113,7 @@
               | solving_failed_unsat
               | solving_failed_timeout
               | solving_failed_unknown
-              | {errors_found, cuter:erroneous_inputs_with_mfas()}
+              | {errors_found, cuter:erroneous_inputs()}
               | {code_logs, cuter_codeserver:logs(), cuter_mock:whitelist(), boolean()}
               | {callgraph_calculation_started, [mfa()]}
               | {callgraph_calculation_failed, string()}
@@ -233,7 +233,7 @@ solving_failed_unknown() ->
   gen_server:call(?PRETTY_PRINTER, solving_failed_unknown).
 
 %% Print the erroneous input that were found.
--spec errors_found(cuter:erroneous_inputs_with_mfas()) -> ok.
+-spec errors_found(cuter:erroneous_inputs()) -> ok.
 errors_found(Errors) ->
   gen_server:call(?PRETTY_PRINTER, {errors_found, Errors}).
 
@@ -643,24 +643,21 @@ unsupported_type_error(Form, _Level) ->
   io:format("~nWARNING: Encountered an unsupported type while parsing the types in Core Erlang forms!~n"),
   io:format("  Form: ~p~n~n", [Form]).
 
-% -spec pp_nl(boolean(), boolean()) -> ok.
-% pp_nl(true, true) -> io:format(standard_error, "~n", []);
-% pp_nl(true, false) -> io:format("~n");
-% pp_nl(false, _) -> ok.
-
 -spec pp_nl(boolean(), boolean()) -> ok.
-pp_nl(_, _) -> ok.
+pp_nl(true, true) -> io:format(standard_error, "~n", []);
+pp_nl(true, false) -> io:format("~n");
+pp_nl(false, _) -> ok.
 
-% -spec pp_solving_failure(solving_failed_unsat | solving_failed_timeout | solving_failed_unknown, level()) -> ok.
+-spec pp_solving_failure(solving_failed_unsat | solving_failed_timeout | solving_failed_unknown, level()) -> ok.
 % pp_solving_failure(solving_failed_unsat, ?MINIMAL) -> io:format(standard_error, "x", []);
-% pp_solving_failure(solving_failed_unsat, _) -> io:format("x");
+% pp_solving_failure(solving_failed_unsat, _) -> %io:format("x");
+%   ok;
 % pp_solving_failure(solving_failed_timeout, ?MINIMAL) -> io:format(standard_error, "t", []);
 % pp_solving_failure(solving_failed_timeout, _) -> io:format("t");
 % pp_solving_failure(solving_failed_unknown, ?MINIMAL) -> io:format(standard_error, "u", []);
 % pp_solving_failure(solving_failed_unknown, _) -> io:format("u").
-
--spec pp_solving_failure(solving_failed_unsat | solving_failed_timeout | solving_failed_unknown, level()) -> ok.
-pp_solving_failure(_, _) -> ok.
+pp_solving_failure(_,_) -> 
+  ok.
 
 -spec pp_execution_info(execution_data(), mfa(), boolean(), level()) -> ok.
 pp_execution_info(Data, MFA, Nl, ?MINIMAL) ->
@@ -685,17 +682,16 @@ pp_execution_info(Data, MFA, Nl, ?FULLY_VERBOSE) ->
 %% Report the execution status
 %% ----------------------------------------------------------------------------
 
-% -spec pp_execution_status_minimal(cuter_iserver:execution_status()) -> ok.
+-spec pp_execution_status_minimal(cuter_iserver:execution_status()) -> ok.
+pp_execution_status_minimal(_) -> ok.
+
 % pp_execution_status_minimal({success, _Result}) ->
-%   io:format(standard_error, ".", []);
+%   %io:format(standard_error, ".", []);
+%   ok;
 % pp_execution_status_minimal({runtime_error, _RuntimeError}) ->
 %   io:format(standard_error, "E", []);
 % pp_execution_status_minimal({internal_error, _InternalError}) ->
 %   io:format(standard_error, "I", []).
-
--spec pp_execution_status_minimal(cuter_iserver:execution_status()) -> ok.
-pp_execution_status_minimal(_) ->
-  ok.
 
 -spec pp_execution_status_verbose(cuter_iserver:execution_status()) -> ok.
 
@@ -1066,7 +1062,7 @@ fsm_started(Port) ->
 fsm_started(_Port) -> ok.
 -endif.
 
--type cmd() :: {file:name(), integer()} | cuter_symbolic:mapping() | binary().	% FIXME
+-type cmd() :: {file:name(), integer()} | cuter_symbolic:mapping() | binary().  % FIXME
 -spec send_cmd(cuter_solver:state(), cmd(), string()) -> ok.
 -ifdef(VERBOSE_SOLVING).
 send_cmd(State, Cmd, Descr) ->
@@ -1171,8 +1167,7 @@ pp_parsed_spec({M, F, A}, {Spec, TypeDeps}, _Level) ->
   io:format("        \033[01;33m~s\033[00m~n", [string:join(Cs, " | ")]),
   io:format("    Types:~n"),
   pp_typedeps(TypeDeps),
-  %io:nl().
-  ok.
+  io:nl().
 
 -spec pp_typedeps(cuter_types:erl_type_deps()) -> ok.
 pp_typedeps(TypeDeps) ->
